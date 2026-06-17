@@ -8,6 +8,7 @@
 #include <memory>
 #include <list>
 #include <mutex>
+#include <atomic>
 
 #include "Group.h"
 #include "Certificate.h"
@@ -33,6 +34,7 @@ class SearchNode;
 class Structure {
 friend class SearchNode;
 friend class StructSet;
+friend class StructHashSet;
 friend class Certifier;
 public:
     explicit Structure(size_t n);
@@ -119,4 +121,22 @@ public:
 protected:
     std::unordered_set<Certificate> data_;
     mutable std::mutex mut_;
+};
+
+// class modelling an unordered collection of non-isomorphic structures. 
+class StructHashSet {
+public:
+    StructHashSet();
+    void extend(const Structure& s);
+    bool empty() const;
+    void write(const std::string& path, bool append = false) const;
+    void clear();
+    bool contains(const Structure& s) const;
+    
+protected:
+    std::vector<std::vector<Certificate>> data_;
+    //mutable std::vector<std::mutex> mut_;
+    mutable std::mutex mut_[10000];
+    std::atomic<bool> empty_;
+    const size_t bsize = 10000;
 };

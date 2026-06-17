@@ -1,2 +1,55 @@
+# Build directories
 /build/
+/build-*/
+/cmake-build-*/
+/out/
+
+# CMake (including in-source builds)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+compile_commands.json
+Testing/
+
+# Compiled libraries and objects
+*.o
+*.o.d
+*.a
+*.so
+*.dylib
+*.exe
+
+# Binaries
+/test_graph
+/test_group
+/test_permutation
+/gen_trees
+/one_vertex
+/gluing
+/turan
+/borsuk
+/stats
+/generate
+
+# IDE
+.idea/
+.vscode/
+*.cbp
+*.iml
+
+# Debugger / crash dumps
+peda-session-*.txt
+core
+core.*
+
+# Generated graph catalogs and computation output
 /data/
+
+# Local research output at repo root (not tracked results/)
+/ex(n,*.txt
+/exponential_*.txt
+/graph_*.txt
+/strongly_reg_*.txt
+/two-dist_*.txt

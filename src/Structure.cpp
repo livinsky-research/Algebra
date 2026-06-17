@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 
 #include "Structure.h"
 
@@ -544,6 +545,7 @@ Finish:
     }
 }
 
+
 void StructSet::insert(const Structure& s) {
     std::lock_guard<std::mutex> lock(mut_);
     data_.insert(s.cert);
@@ -581,4 +583,59 @@ void StructSet::clear() {
 bool StructSet::contains(const Structure& s) const {
     std::lock_guard<std::mutex> lock(mut_);
     return data_.count(s.cert);
+}
+
+
+StructHashSet::StructHashSet() : data_(bsize), empty_(true) {
+}
+
+void StructHashSet::extend(const Structure& s) {
+    empty_ = false;
+    int b = std::hash<Certificate>()(s.cert) % bsize;
+    std::mutex& m = mut_[b];
+    //std::lock_guard<std::mutex> lock(mut_[b]);
+    m.lock();
+    for (const Certificate& cert : data_[b]) {
+        if (cert == s.cert) {
+            m.unlock();
+            return;
+        }
+    }   
+    data_[b].emplace_back(s.cert);
+    m.unlock();
+}
+
+bool StructHashSet::empty() const {
+    return empty_;
+}
+
+void StructHashSet::write(const std::string& path, bool append) const {
+    std::fstream stream;
+    if (append) {
+        stream.open(path, std::ios::app | std::ios::out | std::ios::binary);
+    } else {
+        stream.open(path, std::ios::out | std::ios::binary);
+    }
+    for (const auto& bucket : data_) {
+		for (const Certificate& cert : bucket) {
+		    Structure::writeStruct(stream, cert);
+		}
+    }
+    stream.close();
+}
+
+void StructHashSet::clear() {
+    data_.assign(bsize, std::vector<Certificate>());
+    empty_ = true;
+}
+
+bool StructHashSet::contains(const Structure& s) const {
+    int b = std::hash<Certificate>()(s.cert) % bsize;
+    std::lock_guard<std::mutex> lock(mut_[b]);  
+    for (const Certificate& cert : data_[b]) {
+        if (cert == s.cert) {
+            return true;
+        }
+    }   
+    return false;
 }

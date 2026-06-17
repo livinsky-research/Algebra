@@ -65,46 +65,23 @@ public:
         return std::vector<Certificate>(data_.begin(), data_.end());
     }
 
-    class iterator {
-    public:
-        iterator(const GraphSet* gset, const std::unordered_set<Certificate>::const_iterator& it) : gset_(gset), it_(it) {
-        }
+private:
+    size_t n;
+};
 
-        Graph operator*() const {
-            return Graph(gset_->n, *it_);
-        }
-
-        bool operator!=(const iterator& it) {
-            return gset_ != it.gset_ || it_ != it.it_;
-        }
-
-        bool operator==(const iterator& it) {
-            return gset_ == it.gset_ && it_ == it.it_;
-        }
-
-        iterator& operator++() {
-            ++it_;
-            return *this;
-        }
-
-        iterator operator++(int) {
-            iterator it = *this;
-            ++it_;
-            return it;
-        }
-
-    private:
-        const GraphSet* gset_;
-        std::unordered_set<Certificate>::const_iterator it_;
-    };
-
-    iterator begin() const {
-        return iterator(this, data_.begin());
+class GraphHashSet : public StructHashSet {
+public:
+    GraphHashSet() = default;
+    GraphHashSet(size_t n) : n(n) {
     }
 
-    iterator end() const {
-        return iterator(this, data_.end());
+    void resize(int m) {
+        n = m;
     }
+
+    //std::vector<Certificate> getList() const {
+    //    return std::vector<Certificate>(data_.begin(), data_.end());
+    //}
 
 private:
     size_t n;
