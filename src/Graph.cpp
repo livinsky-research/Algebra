@@ -1,9 +1,5 @@
 #include "Graph.h"
 
-#include <algorithm>
-#include <string>
-#include <vector>
-
 Graph::Graph() : Structure(0), e(0) {
 }
 
@@ -540,4 +536,13 @@ Graph Q(size_t n) {
         G.addEdge(i, i + m);
     }
     return G;
+}
+
+void GraphSet::writeSparse6(int n, const std::string& path) const {
+    std::lock_guard<std::mutex> lock(mut_);
+    std::fstream stream(path, std::ios::out);
+    for (const Certificate& cert : data_) {
+        Graph G(static_cast<size_t>(n), cert);
+        ::writeSparse6(stream, G);
+    }
 }

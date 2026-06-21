@@ -39,9 +39,8 @@ protected:
 };
 
 bool readGraph(std::fstream&, Graph& G);
-
 bool readSparse6(std::fstream& stream, Graph& G);
-void writeSparse6(std::fstream& stream, const Graph& G, bool header = true);
+void writeSparse6(std::fstream& stream, const Graph& G, bool header = false);
 
 Graph operator+(const Graph& G, size_t m);
 Graph operator+(size_t m, const Graph& G);
@@ -69,6 +68,8 @@ public:
     std::vector<Certificate> getList() const {
         return std::vector<Certificate>(data_.begin(), data_.end());
     }
+    
+    void writeSparse6(int n, const std::string& path) const;
 
 private:
     size_t n;

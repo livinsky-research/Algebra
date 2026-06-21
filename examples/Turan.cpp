@@ -136,10 +136,10 @@ public:
             getGraphs();
         }
 
-        std::string path = address + "Extremal/EX(" + std::to_string(n) + ", " + graph_name + ").gr";
+        std::string path = address + "Extremal/EX(" + std::to_string(n) + ", " + graph_name + ").s6";
         qx[N] = EX.size();
         ex[N] = ln[N];
-        EX.write(path);
+        EX.writeSparse6(N, path);
         EX.clear();
 
         return {ex[N], qx[N]};
