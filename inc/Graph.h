@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Structure.h"
+#include <fstream>
+#include <iostream>
 
 // a class representing simple graph
 class Graph : public Structure {
@@ -37,6 +39,9 @@ protected:
 };
 
 bool readGraph(std::fstream&, Graph& G);
+
+bool readSparse6(std::fstream& stream, Graph& G);
+void writeSparse6(std::fstream& stream, const Graph& G, bool header = true);
 
 Graph operator+(const Graph& G, size_t m);
 Graph operator+(size_t m, const Graph& G);
