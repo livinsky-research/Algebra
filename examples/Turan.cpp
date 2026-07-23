@@ -52,6 +52,7 @@ public:
         one.write(filename);
 
         DG.resize(num_threads);
+        EG.resize(num_threads);
         cycles.resize(num_threads);
     }
 
@@ -675,39 +676,8 @@ private:
         if (G.edges() < ln[n] || G.edges() > un[n] + cycles[th].size() - level) {
             return;
         }
-        const std::vector<size_t>& cycle = cycles[th][level];
-
-        if (level < cycles[th].size()) {
-            // do we still need to check this cycle???
-            bool B = true;
-            for (int ii = 0; ii < He; ii++) {
-                if (!G.edge(cycle[He1[ii]], cycle[He2[ii]])) {
-                    B = false;
-                    break;
-                }
-            }
-
-            if (!B) {
-                nextCycle(G, th, level + 1);
-            } else { // we need to clean this cycle off
-                for (int ii = 0; ii < He; ii++) {
-                    if (cycle[He1[ii]] != n - 1 && cycle[He2[ii]] != n - 1) {
-                        if (DG[th][cycle[He1[ii]]] > d && DG[th][cycle[He2[ii]]] > d) {
-                            G.killEdge(cycle[He1[ii]], cycle[He2[ii]]);
-                            DG[th][cycle[He1[ii]]]--;
-                            DG[th][cycle[He2[ii]]]--;
-
-                            nextCycle(G, th, level + 1);
-
-                            G.addEdge(cycle[He1[ii]], cycle[He2[ii]]);
-                            DG[th][cycle[He1[ii]]]++;
-                            DG[th][cycle[He2[ii]]]++;
-                        }
-                    }
-                }
-            }
-        } else {
-            if (G.deg() == d) {
+        if (level == cycles[th].size()) {
+             if (G.deg() == d) {
                 if (critical(G)) {
                     G.certify();
                     CR.insert(G);
@@ -716,11 +686,60 @@ private:
                     }
                 }
             }
+            return;
+        }
+        
+        const std::vector<size_t>& cycle = cycles[th][level];
+        // do we still need to check this cycle???
+        bool B = true;
+        for (int ii = 0; ii < He; ii++) {
+            if (!G.edge(cycle[He1[ii]], cycle[He2[ii]])) {
+                B = false;
+                break;
+            }
+        }
+        
+        for (int ii = 0; ii < He; ++ii) {
+            int index = cycle[He1[ii]] * n + cycle[He2[ii]];
+            if (EG[th][index] == 0) {
+                EG[th][index] = level;
+            }
+        }        
+
+        if (!B) {
+            nextCycle(G, th, level + 1);
+        } else { // we need to clean this cycle off
+            for (int ii = 0; ii < He; ii++) {
+                int index = cycle[He1[ii]] * n + cycle[He2[ii]];
+                if (EG[th][index] != level) {
+                    continue;
+                }
+                if (cycle[He1[ii]] == n - 1 || cycle[He2[ii]] == n - 1) {
+                    continue;
+                }
+                if (DG[th][cycle[He1[ii]]] <= d || DG[th][cycle[He2[ii]]] <= d) {
+                    continue;
+                }
+                G.killEdge(cycle[He1[ii]], cycle[He2[ii]]);
+                DG[th][cycle[He1[ii]]]--;
+                DG[th][cycle[He2[ii]]]--;
+                nextCycle(G, th, level + 1);
+                G.addEdge(cycle[He1[ii]], cycle[He2[ii]]);
+                DG[th][cycle[He1[ii]]]++;
+                DG[th][cycle[He2[ii]]]++;
+            }
+        }
+        for (int ii = 0; ii < He; ++ii) {
+            int index = cycle[He1[ii]] * n + cycle[He2[ii]];
+            if (EG[th][index] == level) {
+                EG[th][index] = 0;
+            }
         }
     }
 
     void deleteCycles(Graph& G, int th) {
         DG[th] = G.getDegrees();
+        EG[th].resize(1 + G.size() * G.size());
         nextCycle(G, th, 0);
     }
 
@@ -746,9 +765,9 @@ private:
                         if (end == false) {
                             return;
                         }
-		                if (G.deg() + 1 < d || G.edges() + d < ln[n]) { //if minimal degree is small enough && there are enough edges
-		                    continue;
-		                }
+                        if (G.deg() + 1 < d || G.edges() + d < ln[n]) { //if minimal degree is small enough && there are enough edges
+                            continue;
+                        }
                         Graph F = G + 1;
                         for (const std::vector<size_t>& clique : cliques) {
                             for (int x : clique) { // adding  a vertex [n-1] of degree d to the clique [i]
@@ -812,6 +831,7 @@ private:
     std::vector<size_t> He2;
 
     std::vector<std::vector<size_t>> DG;
+    std::vector<std::vector<size_t>> EG;
     std::vector<std::vector<size_t>> cliques;
     std::vector<std::vector<std::vector<size_t>>> cycles;
 };
