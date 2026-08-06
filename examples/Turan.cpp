@@ -496,36 +496,33 @@ private:
         }
     }
 
-    bool critical(Graph& G) {
+    bool critical(const Graph& G) {
         size_t n = G.size();
         for (int ii = 0; ii < n; ii++) {
             for (int jj = ii + 1; jj < n; jj++) {
                 if (G.edge(ii, jj)) {
                     continue;
                 }
-
-                G.addEdge(ii, jj);
-
                 bool BB = false;
                 if (graph_name == "C4") { // i -- ii -- jj -- j
-                    for (int i = 0; i < n && !BB; i++) if (G.edge(i, ii))
-                    for (int j = 0; j < n && !BB; j++) if (G.edge(j, jj) && G.edge(i, j)) {
+                    for (int i = 0; i < n && !BB; i++) if (i != jj && G.edge(i, ii))
+                    for (int j = 0; j < n && !BB; j++) if (j != ii && G.edge(j, jj) && G.edge(i, j)) {
                         BB = true;
                     }
                 } else if (graph_name == "C6") { //  i2 -- i1 -- ii -- jj -- j1 -- j2 -- i2
-                    for (int i1 = 0; i1 < n && !BB; i1++) if (G.edge(i1, ii) && i1 != jj)
-                    for (int j1 = 0; j1 < n && !BB; j1++) if (G.edge(j1, jj) && j1 != ii && j1 != i1)
-                    for (int i2 = 0; i2 < n && !BB; i2++) if (G.edge(i1, i2) && i2 != j1 && i2 != ii && i2 != jj)
-                    for (int j2 = 0; j2 < n && !BB; j2++) if (G.edge(j1, j2) && G.edge(i2, j2) && j2 != i1 && j2 != ii && j2 != jj) {
+                    for (int i1 = 0; i1 < n && !BB; i1++) if (i1 != jj && G.edge(i1, ii) )
+                    for (int j1 = 0; j1 < n && !BB; j1++) if (j1 != ii && j1 != i1 && G.edge(j1, jj))
+                    for (int i2 = 0; i2 < n && !BB; i2++) if (i2 != j1 && i2 != ii && i2 != jj && G.edge(i1, i2))
+                    for (int j2 = 0; j2 < n && !BB; j2++) if (j2 != i1 && j2 != ii && j2 != jj && G.edge(j1, j2) && G.edge(i2, j2) ) {
                         BB = true;
                     }
-                } else if (graph_name == "C8") { //  i3 -- i2 -- i1 -- ii -- jj -- j1 -- j2 -- i2 -- i3
-                    for (int i1 = 0; i1 < n && !BB; i1++) if (G.edge(i1, ii) && i1 != jj)
-                    for (int j1 = 0; j1 < n && !BB; j1++) if (G.edge(j1, jj) && j1 != ii && j1 != i1)
-                    for (int i2 = 0; i2 < n && !BB; i2++) if (G.edge(i1, i2) && i2 != j1 && i2 != ii && i2 != jj)
-                    for (int j2 = 0; j2 < n && !BB; j2++) if (G.edge(j1, j2) && j2 != i2 && j2 != i1 && j2 != ii && j2 != jj)
-                    for (int i3 = 0; i3 < n && !BB; i3++) if (G.edge(i2, i3) && i3 != j2 && i3 != i2 && i3 != j1 && i3 != ii && i3 != jj)
-                    for (int j3 = 0; j3 < n && !BB; j3++) if (G.edge(j2, j3) && G.edge(i3, j3) && j3 != i2 && j3 != j1 && j3 != ii && j3 != jj) {
+                } else if (graph_name == "C8") { //  i3 -- i2 -- i1 -- ii -- jj -- j1 -- j2 -- j3 -- i3
+                    for (int i1 = 0; i1 < n && !BB; i1++) if (i1 != jj && G.edge(i1, ii))
+                    for (int j1 = 0; j1 < n && !BB; j1++) if (j1 != ii && j1 != i1 && G.edge(j1, jj))
+                    for (int i2 = 0; i2 < n && !BB; i2++) if (i2 != j1 && i2 != ii && i2 != jj && G.edge(i1, i2))
+                    for (int j2 = 0; j2 < n && !BB; j2++) if (j2 != i2 && j2 != i1 && j2 != ii && j2 != jj && G.edge(j1, j2))
+                    for (int i3 = 0; i3 < n && !BB; i3++) if (i3 != j2 && i3 != i1 && i3 != j1 && i3 != ii && i3 != jj && G.edge(i2, i3))
+                    for (int j3 = 0; j3 < n && !BB; j3++) if (j3 != i2 && j3 != i1 && j3 != ii && j3 != jj && j3 != j1 && G.edge(j2, j3) && G.edge(i3, j3)) {
                         BB = true;
                     }
                 } else if (graph_name == "K23") { // i1, ii =-= jj, j1, j2
@@ -652,16 +649,15 @@ private:
                         BB = true;
                     }
                 } else if (graph_name == "Q3") { // i3 < i1, i2 > ii =-= jj < j1, j2 > j3
-                    for (int i1 = 0; i1 < n && !BB; i1++) if (G.edge(i1, ii))
-                    for (int i2 = i1 + 1; i2 < n && !BB; i2++) if (G.edge(i2, ii))
-                    for (int i3 = 0; i3 < n && !BB; i3++) if (i3 != ii && G.edge(i3, i1) && G.edge(i3, i2))
+                    for (int i1 = 0; i1 < n && !BB; i1++) if (i1 != jj && G.edge(i1, ii))
+                    for (int i2 = i1 + 1; i2 < n && !BB; i2++) if (i2 != jj && G.edge(i2, ii))
+                    for (int i3 = 0; i3 < n && !BB; i3++) if (i3 != ii && i3 != jj && G.edge(i3, i1) && G.edge(i3, i2))
                     for (int j1 = 0; j1 < n && !BB; j1++) if (j1 != ii && j1 != i2 && j1 != i3 && G.edge(j1, jj) && G.edge(j1, i1))
                     for (int j2 = 0; j2 < n && !BB; j2++) if (j2 != ii && j2 != i1 && j2 != i3 && j2 != j1 && G.edge(j2, jj) && G.edge(j2, i2))
-                    for (int j3 = 0; j3 < n && !BB; j3++) if (j3 != ii && j3 != jj && j3 != i1 && j3 != i2 && G.edge(j3, j1) && G.edge(j3, i2) && G.edge(j3, i3)) {
+                    for (int j3 = 0; j3 < n && !BB; j3++) if (j3 != ii && j3 != jj && j3 != i1 && j3 != i2 && G.edge(j3, j1) && G.edge(j3, j2) && G.edge(j3, i3)) {
                         BB = true;
                     }
                 }
-                G.killEdge(ii, jj);
                 if (!BB) {
                     return false;
                 }
@@ -675,38 +671,7 @@ private:
         if (G.edges() < ln[n] || G.edges() > un[n] + cycles[th].size() - level) {
             return;
         }
-        const std::vector<size_t>& cycle = cycles[th][level];
-
-        if (level < cycles[th].size()) {
-            // do we still need to check this cycle???
-            bool B = true;
-            for (int ii = 0; ii < He; ii++) {
-                if (!G.edge(cycle[He1[ii]], cycle[He2[ii]])) {
-                    B = false;
-                    break;
-                }
-            }
-
-            if (!B) {
-                nextCycle(G, th, level + 1);
-            } else { // we need to clean this cycle off
-                for (int ii = 0; ii < He; ii++) {
-                    if (cycle[He1[ii]] != n - 1 && cycle[He2[ii]] != n - 1) {
-                        if (DG[th][cycle[He1[ii]]] > d && DG[th][cycle[He2[ii]]] > d) {
-                            G.killEdge(cycle[He1[ii]], cycle[He2[ii]]);
-                            DG[th][cycle[He1[ii]]]--;
-                            DG[th][cycle[He2[ii]]]--;
-
-                            nextCycle(G, th, level + 1);
-
-                            G.addEdge(cycle[He1[ii]], cycle[He2[ii]]);
-                            DG[th][cycle[He1[ii]]]++;
-                            DG[th][cycle[He2[ii]]]++;
-                        }
-                    }
-                }
-            }
-        } else {
+        if (level == cycles[th].size()) {
             if (G.deg() == d) {
                 if (critical(G)) {
                     G.certify();
@@ -715,6 +680,41 @@ private:
                         EX.insert(G);
                     }
                 }
+            }
+            return;
+        }        
+
+        const std::vector<size_t>& cycle = cycles[th][level];
+        // do we still need to check this cycle???
+        bool B = true;
+        for (int ii = 0; ii < He; ii++) {
+            if (!G.edge(cycle[He1[ii]], cycle[He2[ii]])) {
+                B = false;
+                break;
+            }
+        }
+       
+        if (!B) {
+            nextCycle(G, th, level + 1);
+        } else { // we need to clean this cycle off
+            int c1, c2;
+            for (int ii = 0; ii < He; ii++) {
+                c1 = cycle[He1[ii]];
+                c2 = cycle[He2[ii]];
+                if (c1 == n - 1 || c2 == n - 1) {
+                    continue;
+                }
+                if (DG[th][c1] <= d || DG[th][c2] <= d) {
+                    continue;
+                }
+
+                G.killEdge(c1, c2);
+                DG[th][c1]--;
+                DG[th][c2]--;
+                nextCycle(G, th, level + 1);
+                G.addEdge(c1, c2);
+                DG[th][c1]++;
+                DG[th][c2]++;
             }
         }
     }
